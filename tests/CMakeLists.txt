@@ -1,0 +1,16 @@
+CMAKE_MINIMUM_REQUIRED (VERSION 3.0)
+PROJECT (tests)
+
+SET (SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+SET (MAIN_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../src)
+SET (MAIN_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../include)
+SET (SOURCES
+        ${SRC_DIR}/tests.cpp
+        ${SRC_DIR}/HttpResponseParserTest.cpp
+        ${SRC_DIR}/StringUtilsTest.cpp
+        ${MAIN_SRC_DIR}/HttpResponseParser.cpp
+        ${MAIN_SRC_DIR}/StringUtils.cpp)
+
+ADD_EXECUTABLE (tests ${SOURCES})
+TARGET_LINK_LIBRARIES (tests gtest)
+TARGET_INCLUDE_DIRECTORIES (tests PRIVATE ${MAIN_INCLUDE_DIR})

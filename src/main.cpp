@@ -8,6 +8,8 @@
 #include <arpa/inet.h>
 #endif
 
+#include "ssdp/HttpResponseParser.h"
+
 const std::string discoveryMessage = 
     "M-SEARCH * HTTP/1.1\r\n"
     "HOST:239.255.255.250:1900\r\n"
@@ -50,7 +52,15 @@ main()
                 reinterpret_cast<struct sockaddr *>(&addr), &length);
         if (result > 0) {
             std::string answer(&buffer[0], result);
-            std::cout << answer << std::endl;
+
+            std::cout << "==========================================================" << std::endl;
+            ssdp::HttpResponseParser parser;
+            if (parser.parse(answer)) {
+                std::cout << "Server\t: " << parser.getServer() << std::endl;
+                std::cout << "USN\t: " << parser.getUSN() << std::endl;
+                std::cout << "Location: " << parser.getLocation() << std::endl;
+            }
+            std::cout << "==========================================================" << std::endl;
         }
     }
 
