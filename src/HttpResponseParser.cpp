@@ -4,22 +4,10 @@
 #include "ssdp/HttpResponseParser.h"
 #include "ssdp/StringUtils.h"
 
-bool 
-ssdp::HttpResponseParser::parse(const std::string& response)
-{
-    this->headers.clear();
-
-    std::stringstream input(response);
-    bool result = parseStatusString(input);
-    if (result) {
-        result = parseHeaders(input);
-    }
-
-    return result;
-}
+namespace {
 
 bool
-ssdp::HttpResponseParser::parseStatusString(std::stringstream& input) const
+parseStatusString(std::stringstream& input)
 {
     bool result = false;
 
@@ -33,9 +21,11 @@ ssdp::HttpResponseParser::parseStatusString(std::stringstream& input) const
     return result;
 }
 
-bool
-ssdp::HttpResponseParser::parseHeaders(std::stringstream& input)
+std::map<std::string, std::string>
+parseHeaders(std::stringstream& input)
 {
+    std::map<std::string, std::string> headers;
+
     std::string line;
     while (std::getline(input, line)) {
         size_t position = line.find(':');
@@ -45,32 +35,36 @@ ssdp::HttpResponseParser::parseHeaders(std::stringstream& input)
 
             std::transform(headerName.begin(), headerName.end(), headerName.begin(), ::toupper);
 
-            this->headers[headerName] = headerValue;
+            headers[headerName] = headerValue;
         }
     }
 
-    return this->headers.find("USN") != this->headers.end() &&
-           this->headers.find("LOCATION") != this->headers.end() &&
-           this->headers.find("SERVER") != this->headers.end();
+    return headers;
 }
 
-std::string
-ssdp::HttpResponseParser::getUSN() const
-{
-    auto it = this->headers.find("USN");
-    return it != this->headers.end() ? it->second : std::string();
+
 }
 
-std::string
-ssdp::HttpResponseParser::getLocation() const
+ssdp::Device
+ssdp::HttpResponse::parse(const std::string& response)
 {
-    auto it = this->headers.find("LOCATION");
-    return it != this->headers.end() ? it->second : std::string();
-}
+    std::stringstream input(response);
+    bool result = parseStatusString(input);
+    if (result) {
+        const std::map<std::string, std::string>& headers = parseHeaders(input);
+        if (!headers.empty()) {
+            const auto& serverIt = headers.find("SERVER");
+            const auto& usnIt = headers.find("USN");
+            const auto& locationIt = headers.find("LOCATION");
 
-std::string
-ssdp::HttpResponseParser::getServer() const
-{
-    auto it = this->headers.find("SERVER");
-    return it != this->headers.end() ? it->second : std::string();
+            std::string emptyString;
+            return ssdp::Device(
+                    (usnIt != headers.end()) ? usnIt->second : emptyString,
+                    (locationIt != headers.end()) ? locationIt->second : emptyString,
+                    (serverIt != headers.end()) ? serverIt->second : emptyString);
+        }
+    }
+
+    throw std::invalid_argument("Invalid HTTP response");
+    return ssdp::Device();
 }

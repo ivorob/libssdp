@@ -8,8 +8,10 @@ SET (SOURCES
         ${SRC_DIR}/tests.cpp
         ${SRC_DIR}/HttpResponseParserTest.cpp
         ${SRC_DIR}/StringUtilsTest.cpp
+        ${SRC_DIR}/DeviceTest.cpp
         ${MAIN_SRC_DIR}/HttpResponseParser.cpp
-        ${MAIN_SRC_DIR}/StringUtils.cpp)
+        ${MAIN_SRC_DIR}/StringUtils.cpp
+        ${MAIN_SRC_DIR}/Device.cpp)
 
 ADD_EXECUTABLE (tests ${SOURCES})
 TARGET_LINK_LIBRARIES (tests gtest)

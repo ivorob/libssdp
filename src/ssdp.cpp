@@ -1,4 +1,3 @@
-#include <iostream>
 #include <vector>
 
 #ifdef __APPLE_CC__
@@ -6,8 +5,10 @@
 #include <netdb.h>
 #include <sys/time.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 #endif
 
+#include "ssdp.h"
 #include "ssdp/HttpResponseParser.h"
 
 const std::string discoveryMessage = 
@@ -18,20 +19,25 @@ const std::string discoveryMessage =
     "MAN:\"ssdp:discover\"\r\n"
     "\r\n";
 
-int
-main()
+ssdp::Devices
+ssdp::serviceList(long int usec) noexcept
 {
+    Devices devices;
+
     int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (sock < 0) {
-        std::cerr << "Cannot create socket" << std::endl;
-        return -1;
+        return devices;
     }
 
-    struct timeval tv;
-    tv.tv_sec = 2;
-    tv.tv_usec = 0;
+    struct timeval tv = {0};
+    if ((usec / 1000000) > 0) {
+        tv.tv_sec = usec / 1000000;
+    } else {
+        tv.tv_sec = 0;
+    }
+    tv.tv_usec = usec % 1000000;
     if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
-        perror("Error");
+        return devices;
     }
 
     struct sockaddr_in destAddr = {0};
@@ -41,7 +47,7 @@ main()
     int result = sendto(sock, reinterpret_cast<const void *>(discoveryMessage.c_str()), discoveryMessage.size(), 0,
             reinterpret_cast<const struct sockaddr *>(&destAddr), sizeof(destAddr));
     if (result < 0) {
-        perror("Error");
+        return devices;
     }
 
     std::vector<char> buffer(10240);
@@ -53,16 +59,16 @@ main()
         if (result > 0) {
             std::string answer(&buffer[0], result);
 
-            std::cout << "==========================================================" << std::endl;
-            ssdp::HttpResponseParser parser;
-            if (parser.parse(answer)) {
-                std::cout << "Server\t: " << parser.getServer() << std::endl;
-                std::cout << "USN\t: " << parser.getUSN() << std::endl;
-                std::cout << "Location: " << parser.getLocation() << std::endl;
+            try {
+                Device device = HttpResponse::parse(answer);
+                if (device.isValid()) {
+                    devices.push_back(device);
+                }
+            } catch (const std::invalid_argument&) {
             }
-            std::cout << "==========================================================" << std::endl;
         }
     }
 
-    return 0;
+    close(sock);
+    return devices;
 }

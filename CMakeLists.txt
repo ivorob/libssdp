@@ -3,15 +3,18 @@ PROJECT (ssdp)
 
 SET (SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 SET (SOURCES
-        ${SRC_DIR}/main.cpp
+        ${SRC_DIR}/ssdp.cpp
         ${SRC_DIR}/HttpResponseParser.cpp
-        ${SRC_DIR}/StringUtils.cpp)
+        ${SRC_DIR}/StringUtils.cpp
+        ${SRC_DIR}/Device.cpp
+    )
 
 SET (CMAKE_CXX_STANDARD 11)
 SET (CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ADD_SUBDIRECTORY (${CMAKE_CURRENT_SOURCE_DIR}/third-party)
 ADD_SUBDIRECTORY (${CMAKE_CURRENT_SOURCE_DIR}/tests)
+ADD_SUBDIRECTORY (${CMAKE_CURRENT_SOURCE_DIR}/samples)
 
-ADD_EXECUTABLE (ssdp ${SOURCES})
+ADD_LIBRARY (ssdp ${SOURCES})
 TARGET_INCLUDE_DIRECTORIES (ssdp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

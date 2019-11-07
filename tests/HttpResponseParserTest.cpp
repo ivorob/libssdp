@@ -3,10 +3,23 @@
 
 TEST(HttpResponseParser, wrongResponseTest)
 {
-    ssdp::HttpResponseParser parser;
-    ASSERT_FALSE(parser.parse(""));
-    ASSERT_FALSE(parser.parse("TEST: wrong header"));
-    ASSERT_FALSE(parser.parse("HTTP/1.0 skldf"));
+    try {
+        ssdp::Device device = ssdp::HttpResponse::parse("");
+        FAIL() << "No exception because of invalid argument";
+    } catch (const std::invalid_argument&) {
+    }
+
+    try {
+        ssdp::Device device = ssdp::HttpResponse::parse("TEST: wrong header");
+        FAIL() << "No exception because of invalid argument";
+    } catch (const std::invalid_argument&) {
+    }
+
+    try {
+        ssdp::Device device = ssdp::HttpResponse::parse("HTTP/1.0 test");
+        FAIL() << "No exception because of invalid argument";
+    } catch (const std::invalid_argument&) {
+    }
 
     std::string response = "HTTP/1.1 200 OK\r\n"
         "CACHE-CONTROL: max-age=120\r\n"
@@ -17,7 +30,8 @@ TEST(HttpResponseParser, wrongResponseTest)
         "01-NLS: 1\r\n"
         "BOOTID.UPNP.ORG: 1\r\n"
         "CONFIGID.UPNP.ORG: 1337\r\n";
-    ASSERT_FALSE(parser.parse(response));
+    ssdp::Device device = ssdp::HttpResponse::parse(response);
+    ASSERT_FALSE(device.isValid());
 }
 
 TEST(HttpResponseParser, validResponseTest)
@@ -34,11 +48,11 @@ TEST(HttpResponseParser, validResponseTest)
         "BOOTID.UPNP.ORG: 1\r\n"
         "CONFIGID.UPNP.ORG: 1337\r\n";
 
-    ssdp::HttpResponseParser parser;
-    ASSERT_TRUE(parser.parse(response));
-    ASSERT_EQ("uuid:e1a935d8-c665-3699-3fbd-a3ecbb123855::upnp:rootdevice", parser.getUSN());
-    ASSERT_EQ("http://192.168.1.1:49479/rootDesc.xml", parser.getLocation());
-    ASSERT_EQ("ZyXEL Communications Corp. UPnP/1.1 MiniUPnPd/1.8", parser.getServer());
+    ssdp::Device device = ssdp::HttpResponse::parse(response);
+    ASSERT_TRUE(device.isValid());
+    ASSERT_EQ("uuid:e1a935d8-c665-3699-3fbd-a3ecbb123855::upnp:rootdevice", device.getUSN());
+    ASSERT_EQ("http://192.168.1.1:49479/rootDesc.xml", device.getLocation());
+    ASSERT_EQ("ZyXEL Communications Corp. UPnP/1.1 MiniUPnPd/1.8", device.getDescription());
 
     response = "HTTP/1.1 200 OK\r\n"
         "CACHE-CONTROL: max-age=120\r\n"
@@ -52,15 +66,9 @@ TEST(HttpResponseParser, validResponseTest)
         "BOOTID.UPNP.ORG: 1\r\n"
         "CONFIGID.UPNP.ORG: 1337\r\n";
 
-    ASSERT_TRUE(parser.parse(response));
-    ASSERT_EQ("uuid:e1a935d8-c665-3699-3fbd-a3ecbb123855::upnp:rootdevice", parser.getUSN());
-    ASSERT_EQ("http://192.168.1.1:49479/rootDesc.xml", parser.getLocation());
-    ASSERT_EQ("ZyXEL Communications Corp. UPnP/1.1 MiniUPnPd/1.8", parser.getServer());
-
-    response = "HTTP/1.1 200 OK\r\n"
-               "CACHE-CONTROL: max-age=120\r\n";
-    ASSERT_FALSE(parser.parse(response));
-    ASSERT_EQ("", parser.getUSN());
-    ASSERT_EQ("", parser.getLocation());
-    ASSERT_EQ("", parser.getServer());
+    device = ssdp::HttpResponse::parse(response);
+    ASSERT_TRUE(device.isValid());
+    ASSERT_EQ("uuid:e1a935d8-c665-3699-3fbd-a3ecbb123855::upnp:rootdevice", device.getUSN());
+    ASSERT_EQ("http://192.168.1.1:49479/rootDesc.xml", device.getLocation());
+    ASSERT_EQ("ZyXEL Communications Corp. UPnP/1.1 MiniUPnPd/1.8", device.getDescription());
 }
