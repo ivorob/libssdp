@@ -7,6 +7,8 @@ SET (SOURCES
         ${SRC_DIR}/HttpResponseParser.cpp
         ${SRC_DIR}/StringUtils.cpp
         ${SRC_DIR}/Device.cpp
+        ${SRC_DIR}/AbstractSocket.cpp
+        ${SRC_DIR}/UDPSocket.cpp
     )
 
 SET (CMAKE_CXX_STANDARD 11)

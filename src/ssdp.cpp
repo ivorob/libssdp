@@ -1,15 +1,14 @@
 #include <vector>
 
 #ifdef __APPLE_CC__
-#include <sys/socket.h>
 #include <netdb.h>
 #include <sys/time.h>
 #include <arpa/inet.h>
-#include <unistd.h>
 #endif
 
 #include "ssdp.h"
 #include "ssdp/HttpResponseParser.h"
+#include "ssdp/UDPSocket.h"
 
 const std::string discoveryMessage = 
     "M-SEARCH * HTTP/1.1\r\n"
@@ -24,8 +23,8 @@ ssdp::serviceList(long int usec) noexcept
 {
     Devices devices;
 
-    int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (sock < 0) {
+    UDPSocket socket;
+    if (socket.getNative() < 0) {
         return devices;
     }
 
@@ -36,7 +35,7 @@ ssdp::serviceList(long int usec) noexcept
         tv.tv_sec = 0;
     }
     tv.tv_usec = usec % 1000000;
-    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+    if (setsockopt(socket.getNative(), SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
         return devices;
     }
 
@@ -44,7 +43,7 @@ ssdp::serviceList(long int usec) noexcept
     destAddr.sin_family = AF_INET;
     destAddr.sin_port = htons(1900);
     destAddr.sin_addr.s_addr = inet_addr("239.255.255.250");
-    int result = sendto(sock, reinterpret_cast<const void *>(discoveryMessage.c_str()), discoveryMessage.size(), 0,
+    int result = sendto(socket.getNative(), reinterpret_cast<const void *>(discoveryMessage.c_str()), discoveryMessage.size(), 0,
             reinterpret_cast<const struct sockaddr *>(&destAddr), sizeof(destAddr));
     if (result < 0) {
         return devices;
@@ -54,7 +53,7 @@ ssdp::serviceList(long int usec) noexcept
     while (result > 0) {
         struct sockaddr_in addr = {0};
         socklen_t length = sizeof(addr);
-        result = recvfrom(sock, reinterpret_cast<void *>(&buffer[0]), buffer.size(), 0, 
+        result = recvfrom(socket.getNative(), reinterpret_cast<void *>(&buffer[0]), buffer.size(), 0, 
                 reinterpret_cast<struct sockaddr *>(&addr), &length);
         if (result > 0) {
             std::string answer(&buffer[0], result);
@@ -69,6 +68,5 @@ ssdp::serviceList(long int usec) noexcept
         }
     }
 
-    close(sock);
     return devices;
 }
