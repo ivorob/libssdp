@@ -25,5 +25,5 @@ ADD_TEST(
     NAME
         gtest
     COMMAND
-        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tests --gtest_output="xml:testresults.xml"
+        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tests --gtest_output=xml:testresults.xml
 )
