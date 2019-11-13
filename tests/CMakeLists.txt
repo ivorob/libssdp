@@ -9,9 +9,13 @@ SET (SOURCES
         ${SRC_DIR}/HttpResponseParserTest.cpp
         ${SRC_DIR}/StringUtilsTest.cpp
         ${SRC_DIR}/DeviceTest.cpp
+        ${SRC_DIR}/SocketTest.cpp
         ${MAIN_SRC_DIR}/HttpResponseParser.cpp
         ${MAIN_SRC_DIR}/StringUtils.cpp
-        ${MAIN_SRC_DIR}/Device.cpp)
+        ${MAIN_SRC_DIR}/Device.cpp
+        ${MAIN_SRC_DIR}/AbstractSocket.cpp
+        ${MAIN_SRC_DIR}/UDPSocket.cpp
+    )
 
 ADD_EXECUTABLE (tests ${SOURCES})
 TARGET_LINK_LIBRARIES (tests gtest)
