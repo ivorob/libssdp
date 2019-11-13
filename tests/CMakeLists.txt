@@ -20,3 +20,10 @@ SET (SOURCES
 ADD_EXECUTABLE (tests ${SOURCES})
 TARGET_LINK_LIBRARIES (tests gtest)
 TARGET_INCLUDE_DIRECTORIES (tests PRIVATE ${MAIN_INCLUDE_DIR})
+
+ADD_TEST(
+    NAME
+        gtest
+    COMMAND
+        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tests --gtest_output="xml:testresults.xml"
+)
