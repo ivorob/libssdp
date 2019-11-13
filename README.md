@@ -1,4 +1,3 @@
 == libssdp
 
-Libraries:
-* https://github.com/apache/axis2-c
+Small library to discovery and announce services in local network
