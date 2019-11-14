@@ -9,6 +9,7 @@
 #include "ssdp.h"
 #include "ssdp/HttpResponseParser.h"
 #include "ssdp/UDPSocket.h"
+#include "ssdp/StringUtils.h"
 
 const std::string discoveryMessage = 
     "M-SEARCH * HTTP/1.1\r\n"
@@ -61,6 +62,7 @@ ssdp::serviceList(long int usec) noexcept
             try {
                 Device device = HttpResponse::parse(answer);
                 if (device.isValid()) {
+                    device.setRawResponse(StringUtils::trim(answer));
                     devices.push_back(device);
                 }
             } catch (const std::invalid_argument&) {

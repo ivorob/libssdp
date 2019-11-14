@@ -29,6 +29,18 @@ ssdp::Device::getDescription() const
     return this->server;
 }
 
+const std::string&
+ssdp::Device::getRawResponse() const
+{
+    return this->rawResponse;
+}
+
+void
+ssdp::Device::setRawResponse(const std::string& response)
+{
+    this->rawResponse = response;
+}
+
 bool
 ssdp::Device::isValid() const
 {

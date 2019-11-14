@@ -11,4 +11,5 @@ TEST(StringUtils, trimTest)
     ASSERT_EQ("test", StringUtils::trim("test  "));
     ASSERT_EQ("test", StringUtils::trim("  \ttest  "));
     ASSERT_EQ("", StringUtils::trim("  \t  "));
+    ASSERT_EQ("test", StringUtils::trim("test\r\n\r\r"));
 }

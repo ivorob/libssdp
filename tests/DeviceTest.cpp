@@ -29,3 +29,13 @@ TEST(Device, initConstructorTest)
     ssdp::Device device3("", "http://192.168.1.1/test.xml", "Test Server");
     ASSERT_FALSE(device3.isValid());
 }
+
+TEST(Device, rawResponseTest)
+{
+    ssdp::Device device;
+    std::string rawResponse = device.getRawResponse();
+    ASSERT_TRUE(rawResponse.empty());
+
+    device.setRawResponse("HTTP/1.1 200 OK\r\n");
+    ASSERT_EQ("HTTP/1.1 200 OK\r\n", device.getRawResponse());
+}
