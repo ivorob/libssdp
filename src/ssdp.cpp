@@ -11,16 +11,8 @@
 #include "ssdp/UDPSocket.h"
 #include "ssdp/StringUtils.h"
 
-const std::string discoveryMessage = 
-    "M-SEARCH * HTTP/1.1\r\n"
-    "HOST:239.255.255.250:1900\r\n"
-    "ST:upnp:rootdevice\r\n"
-    "MX:2\r\n"
-    "MAN:\"ssdp:discover\"\r\n"
-    "\r\n";
-
 ssdp::Devices
-ssdp::serviceList(long int usec) noexcept
+ssdp::serviceList(long int usec, const std::string& serviceType) noexcept
 {
     Devices devices;
 
@@ -39,6 +31,15 @@ ssdp::serviceList(long int usec) noexcept
     if (setsockopt(socket.getNative(), SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
         return devices;
     }
+
+    std::string discoveryMessage = 
+        "M-SEARCH * HTTP/1.1\r\n"
+        "HOST:239.255.255.250:1900\r\n"
+        "ST:" + serviceType +  "\r\n"
+        "MX:2\r\n"
+        "MAN:\"ssdp:discover\"\r\n"
+        "\r\n";
+
 
     struct sockaddr_in destAddr = {0};
     destAddr.sin_family = AF_INET;
