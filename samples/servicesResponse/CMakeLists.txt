@@ -7,3 +7,7 @@ SET (SOURCES
 
 ADD_EXECUTABLE (servicesResponse ${SOURCES})
 TARGET_LINK_LIBRARIES (servicesResponse ssdp)
+
+IF (WIN32)
+TARGET_LINK_LIBRARIES (servicesResponse ws2_32)
+ENDIF (WIN32)

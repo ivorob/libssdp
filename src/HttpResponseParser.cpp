@@ -1,4 +1,10 @@
+#if __APPLE_CC__
 #include <strings.h>
+#elif defined(WIN32)
+#include <tchar.h>
+const auto& strncasecmp=_tcsnicmp;
+#endif
+
 #include <algorithm>
 
 #include "ssdp/HttpResponseParser.h"

@@ -1,5 +1,8 @@
 #ifdef __APPLE_CC__
 #include <unistd.h>
+#elif defined(WIN32)
+#include <winsock.h>
+const auto& close = closesocket;
 #endif 
 
 #include "ssdp/AbstractSocket.h"

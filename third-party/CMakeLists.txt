@@ -1,1 +1,3 @@
-ADD_SUBDIRECTORY (${CMAKE_CURRENT_SOURCE_DIR}/googletest)
+SET (BUILD_SHARED_LIBS OFF)
+SET (gtest_force_shared_crt ON)
+ADD_SUBDIRECTORY (googletest)

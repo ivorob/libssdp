@@ -3,6 +3,8 @@
 #ifdef __APPLE_CC__
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#elif defined(WIN32)
+#include <winsock2.h>
 #endif 
 
 #include "ssdp/UDPSocket.h"
@@ -19,16 +21,16 @@ TEST(SocketTest, createDestroyTest)
     {
         ssdp::UDPSocket socket;
         sockfd = socket.getNative();
-        int result = sendto(sockfd, reinterpret_cast<const void *>("test"), 4, 0,
+        int result = sendto(sockfd, reinterpret_cast<const char *>("test"), 4, 0,
                 reinterpret_cast<const struct sockaddr *>(&destAddr), sizeof(destAddr));
         ASSERT_TRUE(result > 0);
 
-        result = sendto(sockfd, reinterpret_cast<const void *>("test"), 4, 0,
+        result = sendto(sockfd, reinterpret_cast<const char *>("test"), 4, 0,
                 reinterpret_cast<const struct sockaddr *>(&destAddr), sizeof(destAddr));
         ASSERT_TRUE(result > 0);
     }
 
-    int result = sendto(sockfd, reinterpret_cast<const void *>("test"), 4, 0,
+    int result = sendto(sockfd, reinterpret_cast<const char *>("test"), 4, 0,
             reinterpret_cast<const struct sockaddr *>(&destAddr), sizeof(destAddr));
     ASSERT_FALSE(result > 0);
 }

@@ -4,6 +4,9 @@
 #include <netdb.h>
 #include <sys/time.h>
 #include <arpa/inet.h>
+#elif defined(WIN32)
+#include <ws2tcpip.h>
+#include <windows.h>
 #endif
 
 #include "ssdp.h"
@@ -36,15 +39,15 @@ ssdp::serviceList(long int usec) noexcept
         tv.tv_sec = 0;
     }
     tv.tv_usec = usec % 1000000;
-    if (setsockopt(socket.getNative(), SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+    if (setsockopt(socket.getNative(), SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<char *>(&tv), sizeof(tv)) < 0) {
         return devices;
     }
 
     struct sockaddr_in destAddr = {0};
     destAddr.sin_family = AF_INET;
     destAddr.sin_port = htons(1900);
-    destAddr.sin_addr.s_addr = inet_addr("239.255.255.250");
-    int result = sendto(socket.getNative(), reinterpret_cast<const void *>(discoveryMessage.c_str()), discoveryMessage.size(), 0,
+    inet_pton(AF_INET, "239.255.255.250", &destAddr.sin_addr.s_addr);
+    int result = sendto(socket.getNative(), reinterpret_cast<const char *>(discoveryMessage.c_str()), static_cast<int>(discoveryMessage.size()), 0,
             reinterpret_cast<const struct sockaddr *>(&destAddr), sizeof(destAddr));
     if (result < 0) {
         return devices;
@@ -54,7 +57,7 @@ ssdp::serviceList(long int usec) noexcept
     while (result > 0) {
         struct sockaddr_in addr = {0};
         socklen_t length = sizeof(addr);
-        result = recvfrom(socket.getNative(), reinterpret_cast<void *>(&buffer[0]), buffer.size(), 0, 
+        result = recvfrom(socket.getNative(), reinterpret_cast<char *>(&buffer[0]), static_cast<int>(buffer.size()), 0, 
                 reinterpret_cast<struct sockaddr *>(&addr), &length);
         if (result > 0) {
             std::string answer(&buffer[0], result);
